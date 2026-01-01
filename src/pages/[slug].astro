@@ -1,61 +1,72 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroBlock from '../components/blocks/HeroBlock.astro';
+import CtaBlock from '../components/blocks/CtaBlock.astro';
+import MarkdownBlock from '../components/blocks/MarkdownBlock.astro';
 import FeaturesBlock from '../components/blocks/FeaturesBlock.astro';
 import TestimonialsBlock from '../components/blocks/TestimonialsBlock.astro';
-import MarkdownBlock from '../components/blocks/MarkdownBlock.astro';
-import CtaBlock from '../components/blocks/CtaBlock.astro';
 import FaqBlock from '../components/blocks/FaqBlock.astro';
-import { getAllPages, getPageBySlug, getSiteSettings } from '../lib/content-api';
+import { getPage, getAllPages, getSiteSettings } from '../lib/content-api';
 
-// Generate static paths at build time
+// Generate static paths for all published pages at build time
 export async function getStaticPaths() {
-  // Fetch all published pages from API
-  const allPages = await getAllPages();
-
-  return allPages.map(page => ({
+  const pages = await getAllPages();
+  return pages.map((page) => ({
     params: { slug: page.slug },
-    props: { pageId: page.id },
   }));
 }
 
-const { pageId } = Astro.props;
 const { slug } = Astro.params;
 
-// Fetch site settings
-const siteSettings = await getSiteSettings();
+if (!slug) {
+  return Astro.redirect('/404');
+}
 
-// Fetch page with blocks from API
-const page = await getPageBySlug(slug as string);
+const page = await getPage(slug);
 
 if (!page) {
   return Astro.redirect('/404');
 }
 
-const blockComponents: Record<string, any> = {
-  hero: HeroBlock,
-  features: FeaturesBlock,
-  testimonials: TestimonialsBlock,
-  markdown: MarkdownBlock,
-  cta: CtaBlock,
-  faq: FaqBlock,
-};
+const siteSettings = await getSiteSettings();
 ---
 
 <BaseLayout
-  title={page.metaTitle || page.title}
-  description={page.metaDescription || page.description || undefined}
-  ogImage={page.ogImage || undefined}
-  siteSettings={siteSettings}
+  title={page.seo_title || page.title}
+  description={page.seo_description}
+  keywords={page.seo_keywords}
+  faviconUrl={siteSettings?.faviconUrl}
 >
-  <main>
-    {page.blocks.map((block: any) => {
-      const Component = blockComponents[block.type];
-      if (!Component) {
-        console.warn(`Unknown block type: ${block.type}`);
+  {page.blocks.map((block) => {
+    switch (block.type) {
+      case 'hero':
+        return (
+          <HeroBlock
+            headline={block.content.headline as string}
+            subheadline={block.content.subheadline as string}
+            ctaText={block.content.ctaText as string}
+            ctaUrl={block.content.ctaUrl as string}
+          />
+        );
+      case 'cta':
+        return (
+          <CtaBlock
+            headline={block.content.headline as string}
+            body={block.content.body as string}
+            buttonText={block.content.buttonText as string}
+            buttonUrl={block.content.buttonUrl as string}
+          />
+        );
+      case 'markdown':
+        return <MarkdownBlock markdown={block.content.markdown as string} />;
+      case 'features':
+        return <FeaturesBlock content={block.content as any} />;
+      case 'testimonials':
+        return <TestimonialsBlock content={block.content as any} />;
+      case 'faq':
+        return <FaqBlock content={block.content as any} />;
+      default:
         return null;
-      }
-      return <Component content={block.content} />;
-    })}
-  </main>
+    }
+  })}
 </BaseLayout>
