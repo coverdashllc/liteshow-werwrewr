@@ -1,114 +1,68 @@
 ---
-// Index page - render home page content directly or show a default landing
-import { getAllPages, getPageBySlug, getSiteSettings } from '../lib/content-api';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroBlock from '../components/blocks/HeroBlock.astro';
-import FeaturesBlock from '../components/blocks/FeaturesBlock.astro';
-import TestimonialsBlock from '../components/blocks/TestimonialsBlock.astro';
-import MarkdownBlock from '../components/blocks/MarkdownBlock.astro';
-import CtaBlock from '../components/blocks/CtaBlock.astro';
-import FaqBlock from '../components/blocks/FaqBlock.astro';
+import { getAllPages, getSiteSettings } from '../lib/content-api';
 
-// Fetch site settings
+const pages = await getAllPages();
 const siteSettings = await getSiteSettings();
-
-// Fetch all published pages
-const allPages = await getAllPages();
-
-// Try to find a page with slug 'home'
-const homePageData = allPages.find(p => p.slug === 'home');
-let homePage = null;
-
-// If home page exists, fetch its full content
-if (homePageData) {
-  homePage = await getPageBySlug('home');
-}
-
-const blockComponents: Record<string, any> = {
-  hero: HeroBlock,
-  features: FeaturesBlock,
-  testimonials: TestimonialsBlock,
-  markdown: MarkdownBlock,
-  cta: CtaBlock,
-  faq: FaqBlock,
-};
 ---
 
-{homePage ? (
-  <BaseLayout
-    title={homePage.title}
-    description={homePage.metaDescription || homePage.description || undefined}
-    ogImage={homePage.ogImage || undefined}
-    siteSettings={siteSettings}
-  >
-    <main>
-      {homePage.blocks.map((block: any) => {
-        const Component = blockComponents[block.type];
-        if (!Component) {
-          console.warn(`Unknown block type: ${block.type}`);
-          return null;
-        }
-        return <Component content={block.content} />;
-      })}
-    </main>
-  </BaseLayout>
-) : (
-  <BaseLayout
-    title={siteSettings?.siteTitle || "Welcome"}
-    description={siteSettings?.siteDescription}
-    siteSettings={siteSettings}
-  >
-    <main class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4">
-      <div class="max-w-4xl mx-auto">
-        <div class="text-center mb-12">
-          <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            {siteSettings?.siteTitle || "Welcome to Your Site"}
-          </h1>
-          {siteSettings?.siteDescription && (
-            <p class="text-lg text-gray-600 dark:text-gray-300">
-              {siteSettings.siteDescription}
-            </p>
-          )}
-        </div>
+<BaseLayout
+  title="werwrewr"
+  description="Welcome to werwrewr"
+  faviconUrl={siteSettings?.faviconUrl}
+>
+  <section class="py-20 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl lg:text-4xl font-bold text-center mb-12 text-gray-900">
+        Welcome to werwrewr
+      </h1>
 
-        {allPages.length > 0 ? (
-          <div class="space-y-4">
-            <h2 class="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-              Pages
-            </h2>
-            <div class="grid gap-4 md:grid-cols-2">
-              {allPages.map((page: any) => (
-                <a
-                  href={`/${page.slug}`}
-                  class="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 dark:border-gray-700"
-                >
-                  <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {page.title}
-                  </h3>
-                  {page.description && (
-                    <p class="text-gray-600 dark:text-gray-300">
-                      {page.description}
-                    </p>
-                  )}
-                </a>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div class="text-center p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-            <p class="text-lg text-gray-600 dark:text-gray-300 mb-4">
-              No pages have been published yet.
-            </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Create and publish pages in your Liteshow dashboard to get started.
-            </p>
-          </div>
-        )}
-
-        <div class="text-center mt-12 text-sm text-gray-500 dark:text-gray-400">
-          Built with <span class="font-semibold">Liteshow</span> - AI-first, Git-powered CMS
+      {pages.length === 0 ? (
+        <div class="text-center mt-12">
+          <p class="text-xl text-gray-600 mb-8">
+            No pages published yet. Create your first page in Liteshow!
+          </p>
         </div>
-      </div>
-    </main>
-  </BaseLayout>
-)}
+      ) : (
+        <div class="mt-12 max-w-5xl mx-auto">
+          <h2 class="text-2xl font-semibold mb-8 text-gray-900">
+            Published Pages
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {pages.map((page) => (
+              <a
+                href={`/${page.slug}`}
+                class="block p-6 bg-white rounded-2xl shadow-sm hover:shadow-md border border-gray-200 transition-shadow duration-200 group"
+              >
+                <h3 class="text-xl font-semibold mb-2 text-gray-900 group-hover:text-blue-600 transition-colors">
+                  {page.title}
+                </h3>
+                {page.seo_description && (
+                  <p class="text-gray-600 leading-relaxed mb-4 line-clamp-2">
+                    {page.seo_description}
+                  </p>
+                )}
+                <div class="flex items-center text-blue-600 font-medium">
+                  View page
+                  <svg
+                    class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

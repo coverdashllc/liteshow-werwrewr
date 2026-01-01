@@ -1,73 +1,108 @@
 ---
-import { marked } from 'marked';
-
 interface Props {
-  content: {
-    markdown: string;
-  };
+  markdown?: string;
 }
 
-const { content } = Astro.props;
-const { markdown } = content;
-
-// Parse markdown to HTML
-const htmlContent = await marked.parse(markdown || '');
+const { markdown = '' } = Astro.props;
 ---
 
-<section class="py-16 bg-white">
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="max-w-3xl mx-auto prose prose-lg prose-blue">
-      <div set:html={htmlContent} class="text-gray-700 leading-relaxed" />
-    </div>
-  </div>
+<section class="markdown-block">
+  <div class="markdown-content" set:html={markdown} />
 </section>
 
 <style>
-  .prose {
-    max-width: 65ch;
+  .markdown-block {
+    padding: 2rem;
   }
 
-  .prose :global(h2) {
-    @apply text-2xl font-bold mb-4 mt-8 text-gray-900;
+  .markdown-content {
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.75;
+    color: #2d3748;
   }
 
-  .prose :global(h3) {
-    @apply text-xl font-semibold mb-3 mt-6 text-gray-900;
+  .markdown-content :global(h1),
+  .markdown-content :global(h2),
+  .markdown-content :global(h3),
+  .markdown-content :global(h4),
+  .markdown-content :global(h5),
+  .markdown-content :global(h6) {
+    font-weight: bold;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #1a202c;
   }
 
-  .prose :global(p) {
-    @apply mb-4;
+  .markdown-content :global(h1) {
+    font-size: 2.25rem;
   }
 
-  .prose :global(ul), .prose :global(ol) {
-    @apply mb-4 ml-6;
+  .markdown-content :global(h2) {
+    font-size: 1.875rem;
   }
 
-  .prose :global(li) {
-    @apply mb-2;
+  .markdown-content :global(h3) {
+    font-size: 1.5rem;
   }
 
-  .prose :global(a) {
-    @apply text-blue-600 hover:text-blue-700 underline;
+  .markdown-content :global(p) {
+    margin-bottom: 1rem;
   }
 
-  .prose :global(strong) {
-    @apply font-semibold text-gray-900;
+  .markdown-content :global(a) {
+    color: #667eea;
+    text-decoration: underline;
   }
 
-  .prose :global(code) {
-    @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono text-gray-800;
+  .markdown-content :global(a:hover) {
+    color: #5a67d8;
   }
 
-  .prose :global(pre) {
-    @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4;
+  .markdown-content :global(ul),
+  .markdown-content :global(ol) {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
   }
 
-  .prose :global(pre code) {
-    @apply bg-transparent p-0;
+  .markdown-content :global(li) {
+    margin-bottom: 0.5rem;
   }
 
-  .prose :global(blockquote) {
-    @apply border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4;
+  .markdown-content :global(code) {
+    background: #f7fafc;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-family: monospace;
+    font-size: 0.875em;
+  }
+
+  .markdown-content :global(pre) {
+    background: #2d3748;
+    color: #f7fafc;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+  }
+
+  .markdown-content :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+
+  .markdown-content :global(blockquote) {
+    border-left: 4px solid #667eea;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #4a5568;
+    font-style: italic;
+  }
+
+  .markdown-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
   }
 </style>
